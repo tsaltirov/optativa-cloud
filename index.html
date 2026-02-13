@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Kubernetes - Guía Completa</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --k8s-blue: #326CE5;
+            --k8s-dark: #1a1d29;
+            --k8s-light: #f8f9fa;
+            --k8s-accent: #00d4ff;
+            --gradient-primary: linear-gradient(135deg, #326CE5 0%, #00d4ff 100%);
+            --gradient-dark: linear-gradient(135deg, #1a1d29 0%, #2d3748 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: rgba(26, 29, 41, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(50, 108, 229, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 30px rgba(50, 108, 229, 0.2);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .k8s-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: var(--k8s-accent) !important;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--k8s-accent);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-dark);
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(50,108,229,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero .lead {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+        
+        .btn-k8s {
+            background: var(--gradient-primary);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(50, 108, 229, 0.3);
+        }
+        
+        .btn-k8s:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(50, 108, 229, 0.4);
+            color: #fff;
+        }
+        
+        .btn-outline-k8s {
+            border: 2px solid var(--k8s-accent);
+            color: var(--k8s-accent);
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-k8s:hover {
+            background: var(--k8s-accent);
+            color: var(--k8s-dark);
+            transform: translateY(-2px);
+        }
+        
+        /* Hero Image Placeholder */
+        .hero-image {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .hero-image::before {
+            content: '🖼️';
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+        
+        .image-placeholder {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* Section Styles */
+        section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+        
+        .section-subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+        
+        /* Feature Cards */
+        .feature-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(50, 108, 229, 0.15);
+            border-color: var(--k8s-blue);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--k8s-dark);
+        }
+        
+        .feature-card p {
+            color: #6c757d;
+            line-height: 1.7;
+        }
+        
+        /* Code Block */
+        .code-block {
+            background: var(--k8s-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .code-title {
+            color: var(--k8s-accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        pre {
+            margin: 0;
+            color: #e9ecef;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        code {
+            color: var(--k8s-accent);
+        }
+        
+        /* Installation Steps */
+        .step-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--k8s-blue);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .step-card:hover {
+            box-shadow: 0 4px 25px rgba(50, 108, 229, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+        
+        .step-card h4 {
+            display: inline;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--k8s-dark);
+        }
+        
+        /* Architecture Section */
+        .architecture-bg {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .architecture-diagram {
+            background: #fff;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Commands Section */
+        .command-category {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .command-category h4 {
+            color: var(--k8s-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .command-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .command-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Resources Cards */
+        .resource-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            height: 100%;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .resource-card:hover {
+            border-color: var(--k8s-blue);
+            box-shadow: 0 4px 20px rgba(50, 108, 229, 0.1);
+        }
+        
+        .resource-card i {
+            font-size: 2rem;
+            color: var(--k8s-blue);
+            margin-bottom: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--gradient-dark);
+            color: #fff;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        footer a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        footer a:hover {
+            color: var(--k8s-accent);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .lead {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .hero {
+                padding: 80px 0 60px;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+        }
+        
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <div class="k8s-logo">K8s</div>
+                Manual Kubernetes
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#conceptos">Conceptos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#instalacion">Instalación</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#arquitectura">Arquitectura</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#comandos">Comandos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#recursos">Recursos</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1 class="fade-in">Manual Completo de Kubernetes</h1>
+                    <p class="lead fade-in">Domina la orquestación de contenedores con la plataforma líder del mercado. Aprende a desplegar, escalar y gestionar aplicaciones en producción.</p>
+                    <div class="fade-in">
+                        <a href="#instalacion" class="btn btn-k8s me-3 mb-3">Comenzar Ahora</a>
+                        <a href="#conceptos" class="btn btn-outline-k8s mb-3">Explorar Conceptos</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image fade-in">
+                        <div class="image-placeholder">
+                            📦 Coloca aquí la imagen del logo de Kubernetes<br>
+                            o un diagrama de arquitectura<br><br>
+                            <strong>Sugerencia:</strong> kubernetes.png<br>
+                            Dimensiones: 600x400px
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conceptos Básicos -->
+    <section id="conceptos">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title fade-in">Conceptos Fundamentales</h2>
+                <p class="section-subtitle fade-in">Entiende los componentes principales de Kubernetes</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+                        <h3>Pods</h3>
+                        <p>La unidad más pequeña de despliegue en Kubernetes. Un Pod puede contener uno o más contenedores que comparten almacenamiento y red.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-hdd-network"></i>
+                        </div>
+                        <h3>Services</h3>
+                        <p>Exponen una aplicación que se ejecuta en un conjunto de Pods como un servicio de red. Proporcionan descubrimiento y balanceo de carga.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-layers"></i>
+                        </div>
+                        <h3>Deployments</h3>
+                        <p>Gestionan el despliegue y escalado de aplicaciones. Permiten actualizaciones rolling y rollbacks automáticos.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-hdd-rack"></i>
+                        </div>
+                        <h3>Nodes</h3>
+                        <p>Máquinas workers que ejecutan las aplicaciones containerizadas. Cada nodo contiene los servicios necesarios para ejecutar Pods.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <h3>Namespaces</h3>
+                        <p>Proporcionan un mecanismo para aislar grupos de recursos dentro de un mismo cluster. Ideal para entornos multi-tenant.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-kanban"></i>
+                        </div>
+                        <h3>ConfigMaps</h3>
+                        <p>Almacenan datos de configuración no confidenciales en pares clave-valor. Separan la configuración del código de la aplicación.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instalación -->
+    <section id="instalacion" class="bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title fade-in">Instalación de Kubernetes</h2>
+                <p class="section-subtitle fade-in">Guía paso a paso para configurar tu cluster</p>
+            </div>
+
+            <!-- Opción 1: Minikube -->
+            <div class="step-card fade-in">
+                <h4><span class="step-number">1</span> Instalación con Minikube (Desarrollo)</h4>
+                <p class="mt-3 mb-3">Minikube es perfecto para desarrollo local y aprendizaje. Crea un cluster de un solo nodo en tu máquina.</p>
+                
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-title">Linux / macOS</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                    <pre><code># Instalar Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# Iniciar cluster
+minikube start --driver=docker
+
+# Verificar instalación
+kubectl cluster-info</code></pre>
+                </div>
+
+                <div class="image-placeholder mt-4">
+                    🖼️ Imagen sugerida: minikube-dashboard.png<br>
+                    Captura del dashboard de Minikube
+                </div>
+            </div>
+
+            <!-- Opción 2: kubeadm -->
+            <div class="step-card fade-in">
+                <h4><span class="step-number">2</span> Instalación con kubeadm (Producción)</h4>
+                <p class="mt-3 mb-3">kubeadm es la herramienta oficial para crear clusters de producción. Requiere al menos 2 CPUs y 2GB de RAM.</p>
+                
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-title">Ubuntu / Debian</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                    <pre><code># Actualizar sistema
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+
+# Agregar repositorio de Kubernetes
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+# Instalar componentes
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+# Inicializar cluster (nodo master)
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+# Configurar kubectl para usuario actual
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config</code></pre>
+                </div>
+            </div>
+
+            <!-- Opción 3: Cloud -->
+            <div class="step-card fade-in">
+                <h4><span class="step-number">3</span> Kubernetes Gestionado en Cloud</h4>
+                <p class="mt-3">Para producción empresarial, considera servicios gestionados como:</p>
+                <ul class="mt-3">
+                    <li><strong>GKE (Google Kubernetes Engine):</strong> Integración nativa con Google Cloud</li>
+                    <li><strong>EKS (Amazon Elastic Kubernetes Service):</strong> Servicio de AWS con alta disponibilidad</li>
+                    <li><strong>AKS (Azure Kubernetes Service):</strong> Solución de Microsoft Azure</li>
+                </ul>
+
+                <div class="image-placeholder mt-4">
+                    🖼️ Imagen sugerida: cloud-providers.png<br>
+                    Logos de GKE, EKS y AKS
+                </div>
+            </div>
+
+            <!-- kubectl -->
+            <div class="step-card fade-in">
+                <h4><span class="step-number">4</span> Instalación de kubectl</h4>
+                <p class="mt-3 mb-3">kubectl es la herramienta de línea de comandos para interactuar con Kubernetes.</p>
+                
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-title">Instalación multiplataforma</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                    <pre><code># Linux
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# macOS (Homebrew)
+brew install kubectl
+
+# Windows (Chocolatey)
+choco install kubernetes-cli
+
+# Verificar instalación
+kubectl version --client</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Arquitectura -->
+    <section id="arquitectura" class="architecture-bg">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title fade-in">Arquitectura de Kubernetes</h2>
+                <p class="section-subtitle fade-in">Componentes del Control Plane y Worker Nodes</p>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <div class="architecture-diagram fade-in">
+                        <div class="image-placeholder" style="width: 100%;">
+                            🖼️ Coloca aquí un diagrama de arquitectura de Kubernetes<br><br>
+                            <strong>Debe mostrar:</strong><br>
+                            • Control Plane (API Server, etcd, Scheduler, Controller Manager)<br>
+                            • Worker Nodes (kubelet, kube-proxy, Container Runtime)<br>
+                            • Pods y Services<br><br>
+                            <strong>Sugerencia:</strong> kubernetes-architecture.png<br>
+                            Dimensiones: 800x600px
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 fade-in">
+                    <div class="feature-card">
+                        <h3><i class="bi bi-gear-fill text-primary me-2"></i>Control Plane</h3>
+                        <ul class="mt-3">
+                            <li><strong>API Server:</strong> Punto de entrada para todas las operaciones REST</li>
+                            <li><strong>etcd:</strong> Base de datos clave-valor para almacenar el estado del cluster</li>
+                            <li><strong>Scheduler:</strong> Asigna Pods a Nodes según recursos disponibles</li>
+                            <li><strong>Controller Manager:</strong> Ejecuta controladores para mantener el estado deseado</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 fade-in">
+                    <div class="feature-card">
+                        <h3><i class="bi bi-server text-success me-2"></i>Worker Nodes</h3>
+                        <ul class="mt-3">
+                            <li><strong>kubelet:</strong> Agente que ejecuta en cada nodo y gestiona Pods</li>
+                            <li><strong>kube-proxy:</strong> Mantiene reglas de red para la comunicación</li>
+                            <li><strong>Container Runtime:</strong> Software para ejecutar contenedores (Docker, containerd, CRI-O)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comandos Esenciales -->
+    <section id="comandos">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title fade-in">Comandos Esenciales</h2>
+                <p class="section-subtitle fade-in">Domina kubectl para gestionar tu cluster</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 fade-in">
+                    <div class="command-category">
+                        <h4><i class="bi bi-info-circle me-2"></i>Información del Cluster</h4>
+                        <div class="command-item">kubectl cluster-info</div>
+                        <div class="command-item">kubectl get nodes</div>
+                        <div class="command-item">kubectl get namespaces</div>
+                        <div class="command-item">kubectl config view</div>
+                    </div>
+
+                    <div class="command-category">
+                        <h4><i class="bi bi-box me-2"></i>Gestión de Pods</h4>
+                        <div class="command-item">kubectl get pods</div>
+                        <div class="command-item">kubectl describe pod &lt;nombre&gt;</div>
+                        <div class="command-item">kubectl logs &lt;pod&gt;</div>
+                        <div class="command-item">kubectl exec -it &lt;pod&gt; -- /bin/bash</div>
+                        <div class="command-item">kubectl delete pod &lt;nombre&gt;</div>
+                    </div>
+
+                    <div class="command-category">
+                        <h4><i class="bi bi-layer-forward me-2"></i>Deployments</h4>
+                        <div class="command-item">kubectl create deployment &lt;name&gt; --image=&lt;image&gt;</div>
+                        <div class="command-item">kubectl get deployments</div>
+                        <div class="command-item">kubectl scale deployment &lt;name&gt; --replicas=3</div>
+                        <div class="command-item">kubectl rollout status deployment/&lt;name&gt;</div>
+                        <div class="command-item">kubectl rollout undo deployment/&lt;name&gt;</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 fade-in">
+                    <div class="command-category">
+                        <h4><i class="bi bi-diagram-3 me-2"></i>Services</h4>
+                        <div class="command-item">kubectl get services</div>
+                        <div class="command-item">kubectl expose deployment &lt;name&gt; --port=80</div>
+                        <div class="command-item">kubectl describe service &lt;nombre&gt;</div>
+                    </div>
+
+                    <div class="command-category">
+                        <h4><i class="bi bi-file-earmark-code me-2"></i>Aplicar Manifiestos</h4>
+                        <div class="command-item">kubectl apply -f &lt;archivo.yaml&gt;</div>
+                        <div class="command-item">kubectl delete -f &lt;archivo.yaml&gt;</div>
+                        <div class="command-item">kubectl get -f &lt;archivo.yaml&gt;</div>
+                    </div>
+
+                    <div class="command-category">
+                        <h4><i class="bi bi-eyeglasses me-2"></i>Debugging</h4>
+                        <div class="command-item">kubectl describe &lt;recurso&gt; &lt;nombre&gt;</div>
+                        <div class="command-item">kubectl logs &lt;pod&gt; -f</div>
+                        <div class="command-item">kubectl top nodes</div>
+                        <div class="command-item">kubectl top pods</div>
+                        <div class="command-item">kubectl get events</div>
+                    </div>
+
+                    <div class="command-category">
+                        <h4><i class="bi bi-lightning me-2"></i>Acceso Rápido</h4>
+                        <div class="command-item">kubectl port-forward &lt;pod&gt; 8080:80</div>
+                        <div class="command-item">kubectl proxy</div>
+                        <div class="command-item">kubectl run &lt;name&gt; --image=&lt;img&gt; --restart=Never</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ejemplo YAML -->
+            <div class="mt-5 fade-in">
+                <h3 class="mb-4">Ejemplo de Deployment YAML</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-title">deployment.yaml</span>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                    <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recursos -->
+    <section id="recursos" class="bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title fade-in">Recursos Adicionales</h2>
+                <p class="section-subtitle fade-in">Continúa tu aprendizaje con estos recursos</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3 fade-in">
+                    <div class="resource-card text-center">
+                        <i class="bi bi-book"></i>
+                        <h4 class="mt-3 mb-3">Documentación Oficial</h4>
+                        <p class="text-muted mb-3">Guías completas y referencias de API</p>
+                        <a href="https://kubernetes.io/docs/" target="_blank" class="btn btn-sm btn-outline-primary">Visitar</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 fade-in">
+                    <div class="resource-card text-center">
+                        <i class="bi bi-mortarboard"></i>
+                        <h4 class="mt-3 mb-3">Tutoriales</h4>
+                        <p class="text-muted mb-3">Aprende con ejemplos prácticos paso a paso</p>
+                        <a href="https://kubernetes.io/docs/tutorials/" target="_blank" class="btn btn-sm btn-outline-primary">Explorar</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 fade-in">
+                    <div class="resource-card text-center">
+                        <i class="bi bi-github"></i>
+                        <h4 class="mt-3 mb-3">GitHub</h4>
+                        <p class="text-muted mb-3">Código fuente y contribuciones</p>
+                        <a href="https://github.com/kubernetes/kubernetes" target="_blank" class="btn btn-sm btn-outline-primary">Ver Repo</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 fade-in">
+                    <div class="resource-card text-center">
+                        <i class="bi bi-people"></i>
+                        <h4 class="mt-3 mb-3">Comunidad</h4>
+                        <p class="text-muted mb-3">Únete a Slack, foros y eventos</p>
+                        <a href="https://kubernetes.io/community/" target="_blank" class="btn btn-sm btn-outline-primary">Conectar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-lg-8 mx-auto fade-in">
+                    <div class="feature-card text-center">
+                        <h3 class="mb-3">📚 Recursos de Aprendizaje Recomendados</h3>
+                        <div class="row mt-4">
+                            <div class="col-md-6 text-start">
+                                <h5>Cursos Online</h5>
+                                <ul>
+                                    <li>Certified Kubernetes Administrator (CKA)</li>
+                                    <li>Certified Kubernetes Application Developer (CKAD)</li>
+                                    <li>Kubernetes for Developers (Udemy, Coursera)</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 text-start">
+                                <h5>Libros Recomendados</h5>
+                                <ul>
+                                    <li>"Kubernetes: Up and Running" - Kelsey Hightower</li>
+                                    <li>"The Kubernetes Book" - Nigel Poulton</li>
+                                    <li>"Kubernetes in Action" - Marko Lukša</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="mb-3">Manual Kubernetes</h5>
+                    <p class="text-muted">Guía completa para dominar la orquestación de contenedores con Kubernetes.</p>
+                </div>
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="mb-3">Enlaces Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#conceptos">Conceptos Básicos</a></li>
+                        <li class="mb-2"><a href="#instalacion">Instalación</a></li>
+                        <li class="mb-2"><a href="#comandos">Comandos</a></li>
+                        <li class="mb-2"><a href="#recursos">Recursos</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="mb-3">Recursos Externos</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="https://kubernetes.io" target="_blank">Kubernetes.io</a></li>
+                        <li class="mb-2"><a href="https://github.com/kubernetes" target="_blank">GitHub</a></li>
+                        <li class="mb-2"><a href="https://kubernetes.io/docs/" target="_blank">Documentación</a></li>
+                        <li class="mb-2"><a href="https://kubernetes.io/blog/" target="_blank">Blog Oficial</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center text-muted">
+                <p class="mb-0">&copy; 2024 Manual Kubernetes. Creado con <i class="bi bi-heart-fill text-danger"></i> para la comunidad</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const targetPosition = target.offsetTop - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Copy code function
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check2"></i> Copiado!';
+                button.style.background = 'rgba(0, 212, 255, 0.3)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = 'rgba(255, 255, 255, 0.1)';
+                }, 2000);
+            });
+        }
+
+        // Auto-collapse navbar on mobile
+        const navLinks = document.querySelectorAll('.nav-link');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 992) {
+                    const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                        toggle: false
+                    });
+                    bsCollapse.hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
